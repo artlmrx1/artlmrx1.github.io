@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blum | ArtLMRX</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        h1 {
+            color: #2e3d49;
+        }
+        .account-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        .account-box {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        .account-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .account-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .account-status {
+            font-size: 0.9em;
+        }
+        .account-details {
+            display: none;
+            margin-top: 10px;
+            font-size: 0.9em;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .account-details p {
+            margin: 5px 0;
+        }
+        .active {
+            color: green;
+        }
+        .inactive {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Blum | ArtLMRX</h1>
+    <div id="stats" class="account-grid"></div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        function getDataFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedData = urlParams.get('data');
+            if (encodedData) {
+                return JSON.parse(atob(encodedData));
+            }
+            return null;
+        }
+
+        function toggleDetails(accountId) {
+            const details = document.getElementById(`details-${accountId}`);
+            details.style.display = details.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function displayStats(accounts) {
+            const statsDiv = document.getElementById('stats');
+            let html = '';
+
+            accounts.forEach((account, index) => {
+                const statusEmoji = account.status === 'Активный' ? '🟢' : '🔴';
+                const statusClass = account.status === 'Активный' ? 'active' : 'inactive';
+                html += `
+                    <div class="account-box" onclick="toggleDetails(${index})">
+                        <div class="account-name">${account.name}</div>
+                        <div class="account-status ${statusClass}">${statusEmoji} ${account.next_run}</div>
+                        <div id="details-${index}" class="account-details">
+                            <p>💰 Баланс: ${account.balance.toFixed(2)}</p>
+                            <p>💎 Алмазы: ${account.diamonds}</p>
+                            <p>✅ Выполнено заданий: ${account.completed_tasks}</p>
+                            <p>🕒 Статус: ${account.status}</p>
+                        </div>
+                    </div>
+                `;
+            });
+
+            statsDiv.innerHTML = html;
+        }
+
+        const accounts = getDataFromUrl();
+        if (accounts) {
+            displayStats(accounts);
+        } else {
+            document.getElementById('stats').innerHTML = "No data received";
+        }
+    </script>
+</body>
+</html>
